@@ -93,7 +93,7 @@ function App() {
       </div>
 
       <div className=" w-full gap-8 md:w-1/2 flex flex-col  justify-center items-center">
-        <div className=" text-6xl text-[#111137] font-bold">Usher-AI</div>
+        <div className=" text-6xl text-[#111137] font-bold">Asher-AI</div>
         <p className=" italic font-light">
           Select a PDF file and get a summary with audio
         </p>
