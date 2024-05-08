@@ -1,10 +1,5 @@
 import { useRef, useState } from "react";
 
-
-import { OpenAI } from "@langchain/openai";
-import { OpenAIEmbeddings } from "@langchain/openai";
-import { loadSummarizationChain } from "langchain/chains";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import robotImage from "./assets/robot.png";
 
 
@@ -109,16 +104,6 @@ function App() {
         const pdfData = await pdfToText(pdfFile);
         const text = pdfData;
 
-        // Create embeddings from the text
-        const model = new OpenAI({
-          temperature: 0,
-          openAIApiKey: `${import.meta.env.VITE_REACT_OPENAI_API_KEY}`,
-        });
-
-        const embeddingsAI = new OpenAIEmbeddings({
-          openAIApiKey: `${import.meta.env.VITE_REACT_OPENAI_API_KEY}`,
-          
-        });
 
         
         const completion = await client.chat.completions.create({
