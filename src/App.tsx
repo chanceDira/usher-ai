@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 
+
 import robotImage from "./assets/robot.png";
 
 
@@ -252,7 +253,7 @@ function App() {
         <div className=" absolute bottom-0 text-gray-500 text-sm">
           Designed by <a href="https://www.codiblegroup.com" target="_blank">Codible Group </a>
         </div>
-        <div className=" text-6xl text-[#111137] font-bold">Asher-AI</div>
+        <div className=" text-6xl text-[#111137] font-bold">Mutijima-AI</div>
         <p className=" italic font-light">
           Select a PDF file and get a summary with audio
         </p>
@@ -327,7 +328,7 @@ function App() {
         </div>
 
         <div className={`${textViewOption ? '' : 'hidden'} w-4/5 text-sm font-light`}>
-         <span className=" font-bold mr-1">Asher-AI: </span> {textResponse}
+         <span className=" font-bold mr-1">Mutijima-AI: </span> {textResponse}
         </div>
 
 
