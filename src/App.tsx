@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 
 import robotImage from "./assets/robot.png";
@@ -7,6 +7,7 @@ import robotImage from "./assets/robot.png";
 import pdfToText from "react-pdftotext";
 
 import OpenAIClient from "openai";
+import Markdown from "react-markdown";
 
 function App() {
   const [pdfFile, setPdfFile] = useState(null);
@@ -244,14 +245,28 @@ function App() {
     }
   };
 
+  const handleKeyPress = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      handleSummarize(event);
+    }
+  }, [handleSummarize]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [handleKeyPress]);
+
   return (
     <div className="card flex flex-row  min-h-screen w-full">
-      <div className=" hidden md:block w-1/2">
+      <div className="  fixed hidden md:block w-1/2">
         <img src={robotImage} alt="" className="  min-h-screen" />
       </div>
 
-      <div className="  relative overflow-x-auto w-full gap-8 md:w-1/2 flex flex-col  justify-center items-center">
-        <div className=" absolute bottom-0 text-gray-500 text-sm">
+      <div className=" absolute  pt-16 min-h-screen  right-0 overflow-x-auto w-full gap-8 md:w-1/2 flex flex-col  justify-center items-center">
+       
+        <div className=" absolute bottom-0 mt-20 text-gray-500 text-sm italic">
           Designed by <a href="https://www.codiblegroup.com" target="_blank">Codible Group </a>
         </div>
         <div className=" text-6xl text-[#111137] font-bold">Mutijima-AI</div>
@@ -328,12 +343,10 @@ function App() {
         )}
         </div>
 
-        <div className={`${textViewOption ? '' : 'hidden'} w-4/5 text-sm font-light`}>
-         <span className=" font-bold mr-1">Mutijima-AI: </span> {textResponse}
+        <div className={`${textViewOption ? '' : 'hidden'} w-4/5 text-sm font-light mb-10`}>
+         <span className=" font-bold mr-1">Mutijima-AI: </span> <Markdown>{textResponse}</Markdown>
         </div>
 
-
-    
       </div>
     </div>
   );
