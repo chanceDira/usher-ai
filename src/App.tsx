@@ -118,6 +118,7 @@ function App() {
             ${text}
 
             Based on the above text, answer the following question.
+            N.B: Please use paragraphs and bullets where needed.
             
             ${question}
            
