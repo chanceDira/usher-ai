@@ -32,6 +32,8 @@ function App() {
     }
   };
 
+  
+
   const client = new OpenAIClient({
     apiKey: `${import.meta.env.VITE_REACT_OPENAI_API_KEY}`,
     dangerouslyAllowBrowser: true,
@@ -129,7 +131,7 @@ function App() {
           // response_format: { type: "json_object" },
         });
 
-        console.log('summarized: ', completion.choices[0].message.content);
+        // console.log('summarized: ', completion.choices[0].message.content);
         setTextResponse(completion.choices[0].message.content || '')
         const content = completion?.choices[0]?.message?.content || ""; 
 
@@ -326,7 +328,7 @@ function App() {
           onClick={handleSummarize}
           className=" disabled:bg-gray-400 bg-[#111137] cursor-pointer disabled:cursor-not-allowed text-white px-6 py-2 rounded-md"
         >
-          Ask
+          {isLoading ? 'Loading' : 'Ask'}
         </button>
 
         <div className="" onClick={() => setTextViewOption(!textViewOption)}>
