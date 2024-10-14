@@ -120,7 +120,7 @@ function App() {
 
             ${text}
 
-            Based on the above text, answer the following question.
+            Based on the above text, answer the following question and make it elaborative.
             N.B: Please use paragraphs and bullets where needed.
             
             ${question}
