@@ -8,11 +8,29 @@ import pdfToText from "react-pdftotext";
 
 import OpenAIClient from "openai";
 import Markdown from "react-markdown";
+import { Toaster } from "react-hot-toast";
+import Notify from "./utils/Notify";
+import type { FormProps } from 'antd';
+import { Button, Form, Input } from 'antd';
+
+type FieldType = {
+  username?: string;
+  password?: string;
+  remember?: string;
+};
+
+
+
+
+const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
+  console.log('Failed:', errorInfo);
+};
 
 function App() {
   const [pdfFile, setPdfFile] = useState(null);
   const [audioUrl, setAudioUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showAIForm, setShowAIForm] = useState(false)
 
   const [recordedAudioUrl, setRecordedAudioUrl] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -23,6 +41,16 @@ function App() {
   const [useText, setUseText] = useState(false)
   const [textResponse, setTextResponse] = useState('')
   const [textViewOption, setTextViewOption] = useState(false)
+
+  const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
+    console.log('Success:', values);
+    if(values.username == '@asher' && values.password =="Run@123") {
+      Notify('Welcome Back Asher !!', 'success')
+      setShowAIForm(true)
+    } else {
+      Notify('Invalid Credentials', 'error')
+    }
+  };
 
   const handleFileChange = (files: any) => {
     if (files && files.length > 0) {
@@ -260,15 +288,62 @@ function App() {
     };
   }, [handleKeyPress]);
 
+ 
+
   return (
+    <>
+      <Toaster position="top-right" reverseOrder={true} />
     <div className="card flex flex-row  min-h-screen w-full">
       <div className="  fixed hidden md:block w-1/2">
         <img src={robotImage} alt="" className="  min-h-screen" />
       </div>
 
-      <div className=" absolute  pt-16 min-h-screen  right-0 overflow-x-auto w-full gap-8 md:w-1/2 flex flex-col  justify-center items-center">
+      <div className={` ${showAIForm && 'hidden'} absolute  pt-16 min-h-screen  right-0 overflow-x-auto w-full gap-8 md:w-1/2 flex flex-col  justify-center items-center`}>
+      <div className=" text-6xl text-[#111137] font-bold">Mutijima-AI</div>
+      <Form
+    name="basic"
+    labelCol={{ span: 8 }}
+    wrapperCol={{ span: 16 }}
+    style={{ maxWidth: 600 }}
+    initialValues={{ remember: true }}
+    onFinish={onFinish}
+    onFinishFailed={onFinishFailed}
+    autoComplete="off"
+  >
+    <Form.Item<FieldType>
+      label="Username"
+      name="username"
+      rules={[{ required: true, message: 'Please input your username!' }]}
+    >
+      <Input />
+    </Form.Item>
+
+    <Form.Item<FieldType>
+      label="Password"
+      name="password"
+      rules={[{ required: true, message: 'Please input your password!' }]}
+    >
+      <Input.Password />
+    </Form.Item>
+
+    {/* <Form.Item<FieldType>
+      name="remember"
+      valuePropName="checked"
+      wrapperCol={{ offset: 8, span: 16 }}
+    >
+      <Checkbox>Remember me</Checkbox>
+    </Form.Item> */}
+
+    <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+      <Button type="primary" htmlType="submit">
+        Submit
+      </Button>
+    </Form.Item>
+  </Form>
+      </div>
+      <div className={` ${!showAIForm && 'hidden'} absolute  pt-16 min-h-screen  right-0 overflow-x-auto w-full gap-8 md:w-1/2 flex flex-col  justify-center items-center`}>
        
-        <div className=" absolute bottom-0 mt-20 text-gray-500 text-sm italic">
+        <div className="  absolute bottom-0 mt-20 text-gray-500 text-sm italic">
           Designed by <a href="https://www.codiblegroup.com" target="_blank">Codible Group </a>
         </div>
         <div className=" text-6xl text-[#111137] font-bold">Mutijima-AI</div>
@@ -331,6 +406,8 @@ function App() {
           {isLoading ? 'Loading' : 'Ask'}
         </button>
 
+
+
         <div className="" onClick={() => setTextViewOption(!textViewOption)}>
           {audioUrl && textResponse ? <div className=" cursor-pointer underline">{textViewOption ? 'Play Audio' : 'View Text'}</div> : <></>}
         </div>
@@ -351,6 +428,7 @@ function App() {
 
       </div>
     </div>
+    </>
   );
 }
 
