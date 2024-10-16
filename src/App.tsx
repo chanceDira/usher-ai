@@ -26,6 +26,9 @@ const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
   console.log('Failed:', errorInfo);
 };
 
+
+
+
 function App() {
   const [pdfFile, setPdfFile] = useState(null);
   const [audioUrl, setAudioUrl] = useState("");
@@ -41,6 +44,7 @@ function App() {
   const [useText, setUseText] = useState(false)
   const [textResponse, setTextResponse] = useState('')
   const [textViewOption, setTextViewOption] = useState(false)
+  const [tableResponse, setTableResponse] = useState<null | any>(null)
 
   const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
     console.log('Success:', values);
@@ -129,12 +133,16 @@ function App() {
     e.preventDefault();
     setAudioUrl("");
     setIsLoading(true);
+    setTableResponse('')
+    setTextResponse('')
 
     if (pdfFile) {
       // PDF file is selected, proceed with summarization
       try {
         const pdfData = await pdfToText(pdfFile);
         const text = pdfData;
+
+const userRequestTable = question.toLowerCase().includes('table') || question.toLowerCase().includes('tabular');
 
 
         
@@ -159,8 +167,21 @@ function App() {
           // response_format: { type: "json_object" },
         });
 
-        // console.log('summarized: ', completion.choices[0].message.content);
+        console.log('summarized: ', completion.choices[0].message.content);
+         const questionResponse = completion.choices[0].message.content || '';
         setTextResponse(completion.choices[0].message.content || '')
+
+   
+          if (userRequestTable) {
+    // Parse response to table structure if requested
+    const tableData = parseResponseToTable(questionResponse); // You can define this function to handle parsing logic
+    setTableResponse(tableData);
+    setIsLoading(false)
+    setTextViewOption(true)
+    return
+  } else {
+    setTextResponse(questionResponse);
+  }
         const content = completion?.choices[0]?.message?.content || ""; 
 
              const response = await client.audio.speech.create({
@@ -214,6 +235,36 @@ function App() {
       // Display a message or UI element to prompt the user to select a PDF file
     }
   };
+
+//   const parseResponseToTable = (response: string) => {
+//   // Assuming the response includes something like Markdown or CSV structure, you can parse it here
+//   const tableRows = response.split('\n').map(row => row.split('|')); // Example for Markdown table parsing
+//   return tableRows;
+// };
+
+const parseResponseToTable = (response: string) => {
+  const tableRegex = /\|.*\|/g; // Matches table rows starting and ending with "|"
+  const tableRows = response.match(tableRegex);
+
+  // If no table found, return null
+  if (!tableRows) {
+    return null;
+  }
+
+  // Extract headers and rows from the matched table content
+  const headers = tableRows[0].split('|').filter((header) => header.trim() !== '');
+  const rows = tableRows.slice(1).map((row) =>
+    row.split('|').filter((cell) => cell.trim() !== '')
+  );
+
+  return [headers, ...rows];
+};
+
+// Function to remove the table part from the response and return only text (intro and conclusion)
+const removeTableFromResponse = (response: string) => {
+  const tableRegex = /\|.*\|/g;
+  return response.replace(tableRegex, '').trim();
+};
 
   const startRecording = () => {
     navigator.mediaDevices.getUserMedia({ audio: true })
@@ -343,8 +394,8 @@ function App() {
       </div>
       <div className={` ${!showAIForm && 'hidden'} absolute  pt-16 min-h-screen  right-0 overflow-x-auto w-full gap-8 md:w-1/2 flex flex-col  justify-center items-center`}>
        
-        <div className="  absolute bottom-0 mt-20 text-gray-500 text-sm italic">
-          Designed by <a href="https://www.codiblegroup.com" target="_blank">Codible Group </a>
+        <div className=" fixed bg-white w-1/2 flex  justify-center items-center py-1 shadow-md border-t bottom-0 mt-20 text-gray-500 text-sm italic">
+          Designed by <a href="https://www.codiblegroup.com" target="_blank" className=" ml-1">Codible Group </a>
         </div>
         <div className=" text-6xl text-[#111137] font-bold">Mutijima-AI</div>
         <p className=" italic font-light">
@@ -422,9 +473,52 @@ function App() {
         )}
         </div>
 
-        <div className={`${textViewOption ? '' : 'hidden'} w-4/5 text-sm font-light mb-10`}>
+        {/* <div className={`${textViewOption ? '' : 'hidden'} w-4/5 text-sm font-light mb-10`}>
          <span className=" font-bold mr-1">Mutijima-AI: </span> <Markdown>{textResponse}</Markdown>
-        </div>
+        </div> */}
+
+<div className={`${textViewOption ? '' : 'hidden'} response-container mb-10`}>
+  {tableResponse && tableResponse.length > 0 ? (
+    <div>
+      {/* Regular text (intro and conclusion) */}
+      <div className={`w-4/5 text-sm font-light mb-4`}>
+        <span className="font-bold mr-1">Mutijima-AI: </span>
+        <Markdown>{removeTableFromResponse(textResponse)}</Markdown>
+      </div>
+
+      {/* Table structure */}
+      <div className="overflow-x-auto mb-4">
+        <table className="min-w-full table-auto border-collapse border border-gray-200">
+          <thead>
+            <tr className="bg-gray-100">
+              {tableResponse[0].map((header: any, idx: any) => (
+                <th key={idx} className="px-4 py-2 border border-gray-200 text-left text-sm font-medium text-gray-700">
+                  <Markdown>{header}</Markdown>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {tableResponse.slice(1).map((row: any, rowIndex: any) => (
+              <tr key={rowIndex} className="even:bg-gray-50">
+                {row.map((cell: any, cellIndex: any) => (
+                  <td key={cellIndex} className="px-4 py-2 border border-gray-200 text-sm text-gray-600">
+                    <Markdown>{cell}</Markdown>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  ) : (
+    <div className={`${isLoading && 'hidden'} w-4/5 text-sm font-light mb-10`}>
+      <span className="font-bold mr-1">Mutijima-AI: </span>
+      <Markdown>{textResponse}</Markdown>
+    </div>
+  )}
+</div>
 
       </div>
     </div>
