@@ -163,7 +163,8 @@ const userRequestTable = question.toLowerCase().includes('table') || question.to
            
             ` },
           ],
-          model: "gpt-3.5-turbo",
+          // model: "gpt-3.5-turbo",
+          model: "gpt-4o",
           // response_format: { type: "json_object" },
         });
 
